@@ -1,0 +1,8 @@
+argparse==1.2.1
+python-dateutil==2.1
+pytz==2012j
+redis==2.7.2
+rq==0.3.7
+six==1.2.0
+times==0.6.1
+wsgiref==0.1.2
