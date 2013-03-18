@@ -15,6 +15,7 @@ from rq import Queue, Connection, Worker
 # barista and roaster, otherwise bean will have no idea what to run -- you can't pass
 # a function by name, apparently. Can still preload, though!
 
+# REPLY: I think if you pass the function name with module name as well, it can figure out what it's looking for.
 import roaster
 
 
