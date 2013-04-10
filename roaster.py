@@ -50,11 +50,12 @@ def identify_symbols(expression_id):
             crop = cropper[y:y+h,x:x+w] # CROP
             resized_crop = cv2.resize(crop, (100,100))  ## THE CROPPED AND RESIZED IS RIGHT HERE
 
-            string = resized_crop.tostring()
+            # Create the PIL version from our NumPy array image.
             crop_pil = Image.fromarray(resized_crop)
-
+            # Create a StringIO object to "write" to.
             crop_buffer = StringIO()
             
+            # "Save" image to the buffer, seek the buffer back to zero.
             crop_pil.save(crop_buffer, 'png')
             crop_buffer.seek(0)
 
@@ -65,6 +66,8 @@ def identify_symbols(expression_id):
             [r.rpush(box_key, value) for value in box]
             [r.zadd(candidates_key, possible_characters[key], key) for key in possible_characters.keys()]
             r.set(image_key, crop_buffer.read())
+
+            crop_buffer.close()
 
             new_symbols.append(symbol_identifier)
 
