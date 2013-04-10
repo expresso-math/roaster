@@ -9,6 +9,8 @@
 import sys
 from rq import Queue, Connection, Worker
 
+from roaster_settings import settings
+
 # Preloading libraries
 
 # It seems as though we'll have to have a python file with function definitions on both
@@ -18,6 +20,9 @@ from rq import Queue, Connection, Worker
 # REPLY: I think if you pass the function name with module name as well, it can figure out what it's looking for.
 import roaster
 
+REDIS_HOST = settings['rq_hostname']
+REDIS_PORT = settings['rq_port']
+REDIS_DB   = settings['rq_db']
 
 # Provide queue names to listen to as arguments to this script,
 # similar to rqworker
