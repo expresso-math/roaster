@@ -4,6 +4,7 @@ http://github.com/expresso-math/
 Daniel Guilak <daniel.guilak@gmail.com> and Josef D. Lange <josef.d.lange@gmail.com>
 """
 import cv2, cv
+import numpy as np
 from PIL import Image
 from cStringIO import StringIO
 
