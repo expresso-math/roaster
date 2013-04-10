@@ -47,12 +47,16 @@ def identify_symbols(expression_id):
             box = [x,y,w,h]
             possible_characters = { 'a' : 0.1 }
 
-
             crop = cropper[y:y+h,x:x+w] # CROP
             resized_crop = cv2.resize(crop, (100,100))  ## THE CROPPED AND RESIZED IS RIGHT HERE
-            
-            worked, stream = cv2.imencode('.png', resized_crop)
 
+            string = resized_crop.tostring()
+            crop_pil = Image.fromarray(resized_crop)
+
+            crop_buffer = StringIO()
+            
+            crop_pil.save(crop_buffer, 'png')
+            crop_buffer.seek(0)
 
             box_key = 'symbol_box:' + str(symbol_identifier)
             candidates_key = 'symbol_candidates:' + str(symbol_identifier)
@@ -60,6 +64,7 @@ def identify_symbols(expression_id):
 
             [r.rpush(box_key, value) for value in box]
             [r.zadd(candidates_key, possible_characters[key], key) for key in possible_characters.keys()]
+            r.set(image_key, crop_buffer.read())
 
             new_symbols.append(symbol_identifier)
 
