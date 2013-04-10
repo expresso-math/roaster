@@ -40,7 +40,6 @@ def identify_symbols(expression_id):
     # Find contours (and hierarchy? I don't know what that is...)
     contours,hierarchy = cv2.findContours(image,cv2.RETR_CCOMP,cv2.CHAIN_APPROX_NONE)
 
-
     for i,contour in enumerate(contours):
         if hierarchy[0,i,2] == -1 and hierarchy[0,i,3] != -1:
             x,y,w,h = cv2.boundingRect(contour)
@@ -48,8 +47,12 @@ def identify_symbols(expression_id):
             box = [x,y,w,h]
             possible_characters = { 'a' : 0.1 }
 
-            resized_crop = cv2.resize(cropper, (100,100))  ## THE CROPPED AND RESIZED IS RIGHT HERE
-                                                        ## BUT HOW DO I GET IT INTO STRING!? SHIT.
+
+            crop = cropper[y:y+h,x:x+w] # CROP
+            resized_crop = cv2.resize(crop, (100,100))  ## THE CROPPED AND RESIZED IS RIGHT HERE
+            
+            worked, stream = cv2.imencode('.png', resized_crop)
+
 
             box_key = 'symbol_box:' + str(symbol_identifier)
             candidates_key = 'symbol_candidates:' + str(symbol_identifier)
