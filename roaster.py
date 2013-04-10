@@ -52,6 +52,6 @@ def identify_symbols(expression_id):
 
         new_symbols.append(symbol_identifier)
 
-    [r.rpush(expression_id, new_symbol) for new_symbol in new_symbols]
+    [r.rpush('expression_symbols:' + expression_id, new_symbol) for new_symbol in new_symbols]
 
     return 1
