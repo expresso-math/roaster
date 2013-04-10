@@ -48,7 +48,7 @@ def identify_symbols(expression_id):
             box = [x,y,w,h]
             possible_characters = { 'a' : 0.1 }
 
-            resized_crop = cv2.resize(crop, (100,100))  ## THE CROPPED AND RESIZED IS RIGHT HERE
+            resized_crop = cv2.resize(cropper, (100,100))  ## THE CROPPED AND RESIZED IS RIGHT HERE
                                                         ## BUT HOW DO I GET IT INTO STRING!? SHIT.
 
             box_key = 'symbol_box:' + str(symbol_identifier)
