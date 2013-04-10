@@ -4,6 +4,7 @@ http://github.com/expresso-math/
 Daniel Guilak <daniel.guilak@gmail.com> and Josef D. Lange <josef.d.lange@gmail.com>
 """
 import cv2, cv
+import numpy as np
 from PIL import Image
 from cStringIO import StringIO
 
@@ -51,6 +52,6 @@ def identify_symbols(expression_id):
 
         new_symbols.append(symbol_identifier)
 
-    [r.rpush(expression_identifier, new_symbol) for new_symbol in new_symbols]
+    [r.rpush(expression_id, new_symbol) for new_symbol in new_symbols]
 
     return 1
