@@ -18,7 +18,7 @@ def identify_symbols(expression_id):
     new_symbols = []
 
     # Get the image from the DB.
-    string_value = r.get('expression_image:'+expression_id)
+    string_value = r.get('expression_image:' + expression_id)
 
     # Opens buffer that takes imageValue as input
     image_buffer = StringIO(string_value)
