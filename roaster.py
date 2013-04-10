@@ -8,7 +8,7 @@ import numpy as np
 from PIL import Image
 from cStringIO import StringIO
 # In order to do this, add ocrn directory to your PYTHONPATH
-import ocrn
+from ocrn import feature as ft
 
 import redis
 import rq
@@ -127,7 +127,7 @@ def train(imageData, asciiValue):
 
     # Here we will want to send the (croppedImages, asciiValue) data
     # Through to Ocrn.
-    ocrn.features.generateDataSetFromRoaster((croppedImages,asciiVal))
+    ft.feature.generateDataSetFromRoaster((croppedImages,asciiValue))
     
 
     return 1
