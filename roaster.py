@@ -63,6 +63,8 @@ def identify_symbols(expression_id):
             g = grinder.Grinder()
             best_guess = g.guess_on_image(crop_buffer)
 
+            crop_buffer.seek(0)
+
             possible_characters = { best_guess : '1.0' }
 
             box_key = 'symbol_box:' + str(symbol_identifier)
@@ -89,6 +91,10 @@ def load_data():
 def run_training():
     g = grinder.Grinder()
     g.train(1000)
+    g.pickle_network()
+
+def reset():
+    g = grinder.Grinder(clean=True)
     g.pickle_network()
 
 def train(imageData, asciiValue):
@@ -129,15 +135,13 @@ def train(imageData, asciiValue):
             x,y,w,h = cv2.boundingRect(contour)
             symbol_identifier = r.incr('symbol_identifier_ids')
             box = [x,y,w,h]
-            # Dummy information
-            possible_characters = { 'a' : 0.1 }
 
             # Resizes to 100x100
             crop = cropper[y:y+h,x:x+w] # CROP
             resized_crop = cv2.resize(crop, (100,100))  ## THE CROPPED AND RESIZED IS RIGHT HERE
                                                         ## BUT HOW DO I GET IT INTO STRING!? SHIT.
             string = resized_crop.tostring()
-            crop_pil = Image.fromarray(resized_crop)
+            crop_pil = Image.fromarray(resized_crop).convert('1')
 
             croppedImages.append(crop_pil)
 
