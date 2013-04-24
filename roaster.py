@@ -7,8 +7,8 @@ import cv2, cv
 import numpy as np
 from PIL import Image
 from cStringIO import StringIO
-# In order to do this, add ocrn directory to your PYTHONPATH
-from ocrn import feature as ft
+# In order to do this, add Ocrn directory to your PYTHONPATH
+import grinder
 
 import redis
 import rq
@@ -47,7 +47,6 @@ def identify_symbols(expression_id):
             x,y,w,h = cv2.boundingRect(contour)
             symbol_identifier = r.incr('symbol_identifier_ids')
             box = [x,y,w,h]
-            possible_characters = { 'a' : 0.1 }
 
             crop = cropper[y:y+h,x:x+w] # CROP
             resized_crop = cv2.resize(crop, (100,100))  ## THE CROPPED AND RESIZED IS RIGHT HERE
@@ -60,6 +59,11 @@ def identify_symbols(expression_id):
             # "Save" image to the buffer, seek the buffer back to zero.
             crop_pil.save(crop_buffer, 'png')
             crop_buffer.seek(0)
+
+            g = grinder.Grinder()
+            best_guess = g.guess_on_image(crop_buffer)
+
+            possible_characters = { best_guess : '1.0' }
 
             box_key = 'symbol_box:' + str(symbol_identifier)
             candidates_key = 'symbol_candidates:' + str(symbol_identifier)
@@ -77,6 +81,15 @@ def identify_symbols(expression_id):
 
     return 1
 
+def load_data():
+    g = grinder.Grinder()
+    g.load_dataset()
+    g.pickle_network()
+
+def run_training():
+    g = grinder.Grinder()
+    g.train(1000)
+    g.pickle_network()
 
 def train(imageData, asciiValue):
     """
@@ -130,7 +143,8 @@ def train(imageData, asciiValue):
 
     # Here we will want to send the (croppedImages, asciiValue) data
     # Through to Ocrn.
-    ft.feature.generateDataSetFromRoaster((croppedImages,asciiValue))
-    
+    # ft.feature.generateDataSetFromRoaster((croppedImages,asciiValue))
+    g = grinder.Grinder()
+    g.generateDataSetFromRoaster((croppedImages, asciiValue))
 
     return 1
