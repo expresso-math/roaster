@@ -126,8 +126,8 @@ def train(imageData, asciiValue):
     # Find contours (and hierarchy? I don't know what that is...)
     contours,hierarchy = cv2.findContours(image,cv2.RETR_CCOMP,cv2.CHAIN_APPROX_NONE)
 
-# Will hold all cropped and resized images to be sent on to
-# Ocrn.
+    # Will hold all cropped and resized images to be sent on to
+    # Ocrn.
     croppedImages = []
 
     for i,contour in enumerate(contours):
@@ -150,5 +150,7 @@ def train(imageData, asciiValue):
     # ft.feature.generateDataSetFromRoaster((croppedImages,asciiValue))
     g = grinder.Grinder()
     g.generateDataSetFromRoaster((croppedImages, asciiValue))
+
+    g.pickle_network()
 
     return 1
