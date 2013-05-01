@@ -7,7 +7,7 @@ import cv2, cv
 import numpy as np
 from PIL import Image
 from cStringIO import StringIO
-# In order to do this, add Ocrn directory to your PYTHONPATH
+
 import grinder
 
 import redis
@@ -18,8 +18,8 @@ from roaster_settings import settings
 r = redis.StrictRedis(host=settings['redis_hostname'], port=settings['redis_port'], db=settings['redis_db'])
 
 g = grinder.Grinder()
-g.load_dataset()
-g.train_loop(10000)
+g.load_data()
+g.train(1000)
 
 def identify_symbols(expression_id):
     
@@ -53,22 +53,24 @@ def identify_symbols(expression_id):
             box = [x,y,w,h]
 
             crop = cropper[y:y+h,x:x+w] # CROP
-            resized_crop = cv2.resize(crop, (100,100))  ## THE CROPPED AND RESIZED IS RIGHT HERE
+            resized_crop = cv2.resize(crop, (90,90))  ## THE CROPPED AND RESIZED IS RIGHT HERE
 
             # Create the PIL version from our NumPy array image.
             crop_pil = Image.fromarray(resized_crop)
+            crop_pil.convert("1")
+            padded = Image.new("1", (100,100), 255)
+            # print crop_pil.mode
+            # print padded.mode
+            padded.paste(crop_pil, (5,5,95,95))
             # Create a StringIO object to "write" to.
             crop_buffer = StringIO()
             
             # "Save" image to the buffer, seek the buffer back to zero.
-            crop_pil.save(crop_buffer, 'png')
+            padded.save(crop_buffer, 'png')
             crop_buffer.seek(0)
 
-            best_guess = g.guess_on_image(crop_buffer)
-
-            print "BEST GUESS"
-            print best_guess
-
+            best_guess = g.guess_on_image_buffer(crop_buffer)
+            print "BEST GUESS IS " + best_guess
             crop_buffer.seek(0)
 
             possible_characters = { best_guess : '1.0' }
@@ -91,8 +93,8 @@ def identify_symbols(expression_id):
 
 def reset():
     g.reset()
-    g.load_dataset()
-    g.train(1000)
+    g.load_data()
+    g.train(100)
 
 def train(imageData, asciiValue):
     """
@@ -135,17 +137,21 @@ def train(imageData, asciiValue):
 
             # Resizes to 100x100
             crop = cropper[y:y+h,x:x+w] # CROP
-            resized_crop = cv2.resize(crop, (100,100))  ## THE CROPPED AND RESIZED IS RIGHT HERE
+            resized_crop = cv2.resize(crop, (90,90))  ## THE CROPPED AND RESIZED IS RIGHT HERE
                                                         ## BUT HOW DO I GET IT INTO STRING!? SHIT.
-            string = resized_crop.tostring()
-            crop_pil = Image.fromarray(resized_crop).convert('P')
+            crop_pil = Image.fromarray(resized_crop)
+            crop_pil.convert("1")
+            padded = Image.new("1", (100,100), 1)
+            # print crop_pil.mode
+            # print padded.mode
+            padded.paste(crop_pil, (5,5,95,95))
 
-            croppedImages.append(crop_pil)
+            croppedImages.append(padded)
 
     # Here we will want to send the (croppedImages, asciiValue) data
     # Through to Ocrn.
     # ft.feature.generateDataSetFromRoaster((croppedImages,asciiValue))
-    g.generateDataSetFromRoaster((croppedImages, asciiValue))
+    g.add_data((croppedImages, asciiValue))
 
 
     return 1
