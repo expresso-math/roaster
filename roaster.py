@@ -17,6 +17,10 @@ from roaster_settings import settings
 
 r = redis.StrictRedis(host=settings['redis_hostname'], port=settings['redis_port'], db=settings['redis_db'])
 
+g = grinder.Grinder()
+g.load_dataset()
+g.train_loop(10000)
+
 def identify_symbols(expression_id):
     
     # Unpacks the data sent to us.
@@ -60,8 +64,10 @@ def identify_symbols(expression_id):
             crop_pil.save(crop_buffer, 'png')
             crop_buffer.seek(0)
 
-            g = grinder.Grinder()
             best_guess = g.guess_on_image(crop_buffer)
+
+            print "BEST GUESS"
+            print best_guess
 
             crop_buffer.seek(0)
 
@@ -83,19 +89,10 @@ def identify_symbols(expression_id):
 
     return 1
 
-def load_data():
-    g = grinder.Grinder()
-    g.load_dataset()
-    g.pickle_network()
-
-def run_training():
-    g = grinder.Grinder()
-    g.train(1000)
-    g.pickle_network()
-
 def reset():
-    g = grinder.Grinder(clean=True)
-    g.pickle_network()
+    g.reset()
+    g.load_dataset()
+    g.train(1000)
 
 def train(imageData, asciiValue):
     """
@@ -119,7 +116,7 @@ def train(imageData, asciiValue):
     img_array = np.asarray(bytearray(image_buffer.read()), dtype=np.uint8)
 
     # Gets a CV2 image from the data array.
-    cropper = cv2.imdecode(img_array, -1)
+    cropper = cv2.imdecode(img_array, 0)
     image = cv2.imdecode(img_array, 0)  # The second argument, zero, is a loading argument.
                                         # We _could_ put in "cv2.CV_LOAD_IMAGE_COLOR" to load color, by why bother?
     ## Do something with the image, then write back some symbols to the database, I presume...
@@ -141,16 +138,14 @@ def train(imageData, asciiValue):
             resized_crop = cv2.resize(crop, (100,100))  ## THE CROPPED AND RESIZED IS RIGHT HERE
                                                         ## BUT HOW DO I GET IT INTO STRING!? SHIT.
             string = resized_crop.tostring()
-            crop_pil = Image.fromarray(resized_crop).convert('1')
+            crop_pil = Image.fromarray(resized_crop).convert('P')
 
             croppedImages.append(crop_pil)
 
     # Here we will want to send the (croppedImages, asciiValue) data
     # Through to Ocrn.
     # ft.feature.generateDataSetFromRoaster((croppedImages,asciiValue))
-    g = grinder.Grinder()
     g.generateDataSetFromRoaster((croppedImages, asciiValue))
 
-    g.pickle_network()
 
     return 1
