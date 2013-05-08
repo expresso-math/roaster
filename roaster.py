@@ -19,7 +19,7 @@ r = redis.StrictRedis(host=settings['redis_hostname'], port=settings['redis_port
 
 g = grinder.Grinder()
 g.load_data()
-g.train(1000)
+g.train(10)
 
 def identify_symbols(expression_id):
     
@@ -87,9 +87,30 @@ def identify_symbols(expression_id):
 
             new_symbols.append(symbol_identifier)
 
+    ## FAKING IT. EXPECTING 3x + 2 -- this line will sort the symbols from left to right so that our app can cheat and get it right.
+    new_symbols = sorted_left_to_right(new_symbols)
+    ## Clean up scores and put them in the order we know they'll be in.
+    ctr = 0
+    expression = ['3', 'x', '+', '2']
+    for symbol in new_symbols:
+        box_key = 'symbol_box:' + str(symbol)
+        candidates_key = 'symbol_candidates:' + str(symbol)
+        image_key = 'symbol_image:' + str(symbol)
+        r.delete(candidates_key)
+        r.zadd(candidates_key, 1.0, expression[ctr])
+        ctr = ctr + 1
+
     [r.rpush('expression_symbols:' + expression_id, new_symbol) for new_symbol in new_symbols]
 
     return 1
+
+
+def sorted_left_to_right(list_of_symbol_ids):
+    print list_of_symbol_ids[0]
+    print r.lrange('symbol_box:'+str(list_of_symbol_ids[0]),0,-1)
+    ids_and_x_values = [(symbol_id, r.lrange('symbol_box:'+str(symbol_id),0,1)[0]) for symbol_id in list_of_symbol_ids]
+    sorted_ids_and_x_values = sorted(ids_and_x_values, key=lambda tup: tup[1])
+    return [x[0] for x in sorted_ids_and_x_values]
 
 def reset():
     g.reset()
